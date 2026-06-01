@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Codex Desktop 插件修复报告</title>
+  <style>
+    :root {
+      --bg: #050812;
+      --panel: rgba(13, 25, 52, .78);
+      --panel2: rgba(4, 12, 27, .92);
+      --cyan: #38d5ff;
+      --blue: #5487ff;
+      --green: #44f0a7;
+      --red: #ff4d6d;
+      --yellow: #ffd166;
+      --text: #eef6ff;
+      --muted: #9db4d8;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 50% 0%, #163365 0%, #081126 34%, #030610 100%);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+    }
+
+    .stage {
+      width: min(100vw, 56.25vh);
+      height: min(177.78vw, 100vh);
+      aspect-ratio: 9 / 16;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(55, 151, 255, .11), transparent 38%),
+        radial-gradient(circle at 20% 20%, rgba(56, 213, 255, .22), transparent 28%),
+        radial-gradient(circle at 80% 75%, rgba(84, 135, 255, .24), transparent 34%),
+        var(--bg);
+      box-shadow: 0 0 80px rgba(0,0,0,.7);
+    }
+
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(56,213,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56,213,255,.08) 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: linear-gradient(to bottom, transparent, #000 16%, #000 86%, transparent);
+      animation: gridMove 8s linear infinite;
+    }
+
+    .scanline {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, rgba(56,213,255,.08) 50%, transparent 100%);
+      height: 18%;
+      animation: scan 5s ease-in-out infinite;
+      mix-blend-mode: screen;
+    }
+
+    .noise {
+      position: absolute;
+      inset: -20%;
+      opacity: .12;
+      background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 3px);
+      animation: noise 1s steps(2) infinite;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 54px 34px 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(24px) scale(.985);
+      animation: show 78s linear infinite;
+    }
+
+    .kicker {
+      color: var(--cyan);
+      letter-spacing: .18em;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    h1, h2 {
+      margin: 0;
+      line-height: 1.08;
+      text-wrap: balance;
+    }
+
+    h1 {
+      font-size: 48px;
+      letter-spacing: -1.6px;
+    }
+
+    h2 {
+      font-size: 38px;
+      letter-spacing: -1px;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.55;
+      margin: 18px 0 0;
+    }
+
+    .big-alert {
+      margin-top: 28px;
+      padding: 18px 20px;
+      border: 1px solid rgba(255,77,109,.45);
+      border-radius: 18px;
+      background: rgba(255,77,109,.11);
+      color: #ffd8df;
+      font-size: 21px;
+      font-weight: 700;
+      box-shadow: 0 0 34px rgba(255,77,109,.15);
+    }
+
+    .terminal, .filetree, .card, .repo {
+      margin-top: 28px;
+      border: 1px solid rgba(91, 172, 255, .28);
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(13,25,52,.88), rgba(3,8,20,.92));
+      box-shadow: 0 20px 80px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+
+    .terminal-head {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 14px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 99px; }
+    .dot.red { background: var(--red); }
+    .dot.yellow { background: var(--yellow); }
+    .dot.green { background: var(--green); }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      color: #dcecff;
+      font-size: 14px;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .error { color: #ff8ca0; }
+    .ok { color: #75ffc3; }
+    .warn { color: #ffe08a; }
+    .path { color: var(--yellow); font-weight: 800; }
+    .cyan { color: var(--cyan); }
+
+    .chips {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.11);
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .chip span:last-child { color: var(--red); }
+    .chip.good span:last-child { color: var(--green); }
+
+    .filetree { padding: 22px; }
+    .folder, .file {
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 15px;
+      color: #cfe4ff;
+    }
+    .folder { color: #88c7ff; }
+    .file.highlight {
+      color: #06101d;
+      background: linear-gradient(90deg, var(--yellow), #fff0a8);
+      box-shadow: 0 0 30px rgba(255,209,102,.45);
+      font-weight: 900;
+    }
+
+    .steps {
+      display: grid;
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      font-size: 19px;
+      line-height: 1.35;
+      color: #d9eaff;
+    }
+    .num {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: grid; place-items: center;
+      background: rgba(56,213,255,.16);
+      border: 1px solid rgba(56,213,255,.45);
+      color: var(--cyan);
+      font-weight: 900;
+    }
+
+    .repo { padding: 24px; }
+    .repo-title { font-size: 24px; font-weight: 900; color: #fff; }
+    .repo-url { margin-top: 10px; color: var(--cyan); font-size: 15px; word-break: break-all; }
+    .repo-files { margin-top: 20px; display: grid; gap: 10px; }
+    .repo-file { padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,.06); color: #ddecff; font-family: ui-monospace, monospace; }
+
+    .footer {
+      position: absolute;
+      left: 34px; right: 34px; bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      color: rgba(238,246,255,.58);
+      font-size: 12px;
+      letter-spacing: .08em;
+      z-index: 5;
+    }
+
+    .progress {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 4px;
+      background: rgba(255,255,255,.08);
+      z-index: 10;
+    }
+    .progress::after {
+      content: "";
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--cyan), var(--green));
+      animation: progress 78s linear infinite;
+    }
+
+    .s1 { animation-delay: 0s; }
+    .s2 { animation-delay: 9s; }
+    .s3 { animation-delay: 19s; }
+    .s4 { animation-delay: 29s; }
+    .s5 { animation-delay: 41s; }
+    .s6 { animation-delay: 54s; }
+    .s7 { animation-delay: 66s; }
+
+    @keyframes show {
+      0%, 8% { opacity: 0; transform: translateY(24px) scale(.985); }
+      11%, 18% { opacity: 1; transform: translateY(0) scale(1); }
+      21%, 100% { opacity: 0; transform: translateY(-20px) scale(1.01); }
+    }
+    @keyframes progress { from { width: 0%; } to { width: 100%; } }
+    @keyframes gridMove { to { transform: translateY(38px); } }
+    @keyframes scan { 0%,100% { transform: translateY(-120%); } 50% { transform: translateY(620%); } }
+    @keyframes noise { 0% { transform: translateY(0); } 100% { transform: translateY(3px); } }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <div class="grid"></div>
+    <div class="scanline"></div>
+    <div class="noise"></div>
+
+    <section class="slide s1">
+      <div class="kicker">AI TECH REPORT</div>
+      <h1>Codex 调不出 Chrome？</h1>
+      <p>Computer Use 也不可用？这个问题可能不是 API key。</p>
+      <div class="big-alert">@chrome unavailable<br/>Computer Use native pipe path unavailable</div>
+    </section>
+
+    <section class="slide s2">
+      <div class="kicker">SYMPTOM</div>
+      <h2>常见现象</h2>
+      <div class="terminal">
+        <div class="terminal-head"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i></div>
+        <pre><span class="error">Computer Use native pipe path is unavailable</span>
+
+@chrome 无法调用
+插件列表看不到：
+- Browser
+- Chrome
+- Computer Use</pre>
+      </div>
+    </section>
+
+    <section class="slide s3">
+      <div class="kicker">WRONG DIRECTION</div>
+      <h2>很多人会误判</h2>
+      <div class="chips">
+        <div class="chip"><span>Chrome 扩展坏了？</span><span>×</span></div>
+        <div class="chip"><span>API key 不对？</span><span>×</span></div>
+        <div class="chip"><span>js_repl 没开？</span><span>×</span></div>
+      </div>
+      <p>这次真正的问题，在本地 marketplace 结构。</p>
+    </section>
+
+    <section class="slide s4">
+      <div class="kicker">ROOT CAUSE</div>
+      <h2>关键路径缺失</h2>
+      <div class="filetree">
+        <div class="folder">.codex/</div>
+        <div class="folder">└─ local-marketplaces/</div>
+        <div class="folder">&nbsp;&nbsp;└─ openai-bundled/</div>
+        <div class="folder">&nbsp;&nbsp;&nbsp;&nbsp;└─ .agents/</div>
+        <div class="folder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ plugins/</div>
+        <div class="file highlight">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ marketplace.json</div>
+      </div>
+      <p>只放根目录 marketplace.json 不够。</p>
+    </section>
+
+    <section class="slide s5">
+      <div class="kicker">FIX</div>
+      <h2>修复动作</h2>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><div>从 Codex 安装包复制官方 <span class="cyan">openai-bundled</span> 插件</div></div>
+        <div class="step"><div class="num">2</div><div>放到用户目录下的本地 marketplace</div></div>
+        <div class="step"><div class="num">3</div><div>补齐 <span class="path">.agents/plugins/marketplace.json</span></div></div>
+        <div class="step"><div class="num">4</div><div>在 config.toml 启用 browser / chrome / computer-use</div></div>
+      </div>
+    </section>
+
+    <section class="slide s6">
+      <div class="kicker">VERIFY</div>
+      <h2>重启后验证</h2>
+      <div class="terminal">
+        <div class="terminal-head"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i></div>
+        <pre>codex plugin list
+
+<span class="ok">browser@openai-bundled installed, enabled</span>
+<span class="ok">chrome@openai-bundled installed, enabled</span>
+<span class="ok">computer-use@openai-bundled installed, enabled</span></pre>
+      </div>
+      <p>看到 enabled，说明插件管理器已经正确识别。</p>
+    </section>
+
+    <section class="slide s7">
+      <div class="kicker">OPEN SOURCE</div>
+      <h2>完整文档已开源</h2>
+      <div class="repo">
+        <div class="repo-title">codex-desktop-plugin-fix</div>
+        <div class="repo-url">github.com/1746498796/codex-desktop-plugin-fix</div>
+        <div class="repo-files">
+          <div class="repo-file">README.md</div>
+          <div class="repo-file">scripts/Repair-CodexBundledPlugins.ps1</div>
+          <div class="repo-file">AI_VIDEO_STORYBOARD.md</div>
+        </div>
+      </div>
+      <p>如果你也遇到 Codex 调不出 Chrome 或电脑控制，可以按这个思路检查。</p>
+    </section>
+
+    <div class="footer"><span>CODEX PLUGIN FIX</span><span>AI VIDEO REPORT</span></div>
+    <div class="progress"></div>
+  </main>
+</body>
+</html>
