@@ -1,0 +1,20 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets / local files
+.env
+*.env
+*.key
+*.pem
+*.p12
+*.pfx
+auth.json
+config.local.toml
+
+# Logs / temp
+*.log
+tmp/
+temp/
