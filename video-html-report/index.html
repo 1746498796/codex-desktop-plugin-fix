@@ -235,6 +235,51 @@
     .repo-files { margin-top: 20px; display: grid; gap: 10px; }
     .repo-file { padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,.06); color: #ddecff; font-family: ui-monospace, monospace; }
 
+
+    .shot-wrap {
+      margin-top: 26px;
+      padding: 12px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+      border: 1px solid rgba(255,255,255,.16);
+      box-shadow: 0 22px 70px rgba(0,0,0,.38);
+    }
+    .shot {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: #fff;
+      filter: saturate(1.05) contrast(1.03);
+    }
+    .shot-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(56,213,255,.14);
+      border: 1px solid rgba(56,213,255,.28);
+      color: #dff8ff;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .04em;
+    }
+    .shot-label.problem { background: rgba(255,77,109,.14); border-color: rgba(255,77,109,.32); color: #ffe1e7; }
+    .shot-label.success { background: rgba(68,240,167,.14); border-color: rgba(68,240,167,.32); color: #ddfff1; }
+    .shot-stack {
+      display: grid;
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .shot-small {
+      padding: 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.13);
+    }
+
     .footer {
       position: absolute;
       left: 34px; right: 34px; bottom: 24px;
@@ -296,17 +341,12 @@
 
     <section class="slide s2">
       <div class="kicker">SYMPTOM</div>
-      <h2>常见现象</h2>
-      <div class="terminal">
-        <div class="terminal-head"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i></div>
-        <pre><span class="error">Computer Use native pipe path is unavailable</span>
-
-@chrome 无法调用
-插件列表看不到：
-- Browser
-- Chrome
-- Computer Use</pre>
+      <h2>真实问题截图</h2>
+      <div class="shot-wrap">
+        <div class="shot-label problem">BEFORE · Computer Use 插件不可用</div>
+        <img class="shot" src="assets/03-problem-before.jpg" alt="Computer Use 插件不可用的问题截图" />
       </div>
+      <p>@chrome 调不出，电脑操控入口直接不可用。</p>
     </section>
 
     <section class="slide s3">
@@ -336,27 +376,26 @@
 
     <section class="slide s5">
       <div class="kicker">FIX</div>
-      <h2>修复动作</h2>
+      <h2>把排查交给 AI</h2>
+      <div class="shot-wrap">
+        <div class="shot-label">CASE · AI 修复记录</div>
+        <img class="shot" src="assets/01-ai-repair-record.jpg" alt="交给 AI 的 Codex 修复记录" />
+      </div>
       <div class="steps">
-        <div class="step"><div class="num">1</div><div>从 Codex 安装包复制官方 <span class="cyan">openai-bundled</span> 插件</div></div>
-        <div class="step"><div class="num">2</div><div>放到用户目录下的本地 marketplace</div></div>
-        <div class="step"><div class="num">3</div><div>补齐 <span class="path">.agents/plugins/marketplace.json</span></div></div>
-        <div class="step"><div class="num">4</div><div>在 config.toml 启用 browser / chrome / computer-use</div></div>
+        <div class="step"><div class="num">1</div><div>复制官方 openai-bundled 插件</div></div>
+        <div class="step"><div class="num">2</div><div>补齐 <span class="path">.agents/plugins/marketplace.json</span></div></div>
+        <div class="step"><div class="num">3</div><div>启用 browser / chrome / computer-use</div></div>
       </div>
     </section>
 
     <section class="slide s6">
       <div class="kicker">VERIFY</div>
-      <h2>重启后验证</h2>
-      <div class="terminal">
-        <div class="terminal-head"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i></div>
-        <pre>codex plugin list
-
-<span class="ok">browser@openai-bundled installed, enabled</span>
-<span class="ok">chrome@openai-bundled installed, enabled</span>
-<span class="ok">computer-use@openai-bundled installed, enabled</span></pre>
+      <h2>修复后恢复正常</h2>
+      <div class="shot-wrap">
+        <div class="shot-label success">AFTER · Chrome 与任意应用控制恢复</div>
+        <img class="shot" src="assets/02-fixed-success.jpg" alt="Computer Use 修复成功截图" />
       </div>
-      <p>看到 enabled，说明插件管理器已经正确识别。</p>
+      <p>Chrome 已连接浏览器扩展程序，可以进行更多控制。</p>
     </section>
 
     <section class="slide s7">
