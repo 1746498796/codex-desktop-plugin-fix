@@ -66,3 +66,16 @@ Computer Use 轻量验证：`sky.list_apps()` 能返回应用列表。
 ### 6. 收尾
 
 我把完整文档和 PowerShell 脚本放到 GitHub。如果你也遇到 Codex 插件不可见、`@chrome` 不可用、Computer Use native pipe 报错，可以按 README 检查一下 manifest 路径。
+
+
+## TTS 友好版补充
+
+如果用剪映、MiniMax 或火山 TTS，不建议直接朗读包含长路径和大量英文符号的版本。
+
+更适合 AI 朗读的短句版见：
+
+```text
+video-html-report/VOICEOVER_TTS.md
+```
+
+注意表达口径：这是“我结合 AI 一起排查完成的修复”，不要说成 AI 单独完成。
